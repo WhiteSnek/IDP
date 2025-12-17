@@ -33,7 +33,7 @@ class Service {
         try{
             const user = await this.repository.getUserByEmail(email) || await this.repository.getUserByMobile(phone_no, ISD_code);
             if(!user){
-                return {response: new ApiResponse(404, {}, "User not found"),};
+                return {response: new ApiResponse(401, {}, "Invalid credentials"),};
             }
             const checkPassword = await compare(password, user.password);
             if(!checkPassword){
