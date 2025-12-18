@@ -11,6 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
 // table to store basic user information
 model User {
@@ -53,7 +54,7 @@ model Applications {
   name         String
   clientId     String   @unique
   clientSecret String
-  redirectUrl  String
+  redirectUrls  String[]
   createdAt    DateTime @default(now())
 
   // Relations

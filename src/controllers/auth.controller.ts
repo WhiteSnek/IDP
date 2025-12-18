@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import AuthService from "../service/auth.service";
-import { loginUserSchema, registerUserSchema } from "../validation";
+import { loginUserSchema, registerUserSchema } from "../validation/auth.validation";
 import { ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import { AuthenticatedRequest } from "../types/request";
