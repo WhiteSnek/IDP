@@ -1,7 +1,7 @@
 import { prisma } from "../config";
 import { RegisterUser } from "../types/user";
 
-class Repository{
+class AuthRepository{
     async createUser(data: RegisterUser){
         const user = await prisma.user.create({
             data,
@@ -33,4 +33,4 @@ class Repository{
     })}
 }
 
-export default Repository;
+export default AuthRepository;

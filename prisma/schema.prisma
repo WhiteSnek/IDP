@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
+// table to store basic user information
 model User {
   id                String      @id @default(cuid())
   email             String      @unique
@@ -32,7 +32,7 @@ model User {
   oauthProviders    OAuthProviders[]
   verificationTokens VerificationTokens[]
 }
-
+// table to store user sessions on different devices
 model Sessions {
   id           String   @id @default(cuid())
   userId       String
@@ -47,7 +47,7 @@ model Sessions {
 
   @@index([userId])
 }
-
+// table to store service applications
 model Applications {
   id           String   @id @default(cuid())
   name         String
@@ -59,7 +59,7 @@ model Applications {
   // Relations
   userApplications UserApplications[]
 }
-
+// junction table to link users and applications with roles
 model UserApplications {
   id             String        @id @default(cuid())
   userId         String
@@ -73,7 +73,7 @@ model UserApplications {
 
   @@index([userId, applicationId])
 }
-
+// table to store OAuth provider information for users
 model OAuthProviders {
   id              String   @id @default(cuid())
   userId          String
@@ -85,7 +85,7 @@ model OAuthProviders {
   // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
+// table to store verification tokens for email/phone verification and password resets
 model VerificationTokens {
   id         String   @id @default(cuid())
   userId     String

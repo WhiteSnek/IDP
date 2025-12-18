@@ -1,13 +1,13 @@
-import Repository from "../repository";
+import AuthRepository from "../repository/auth.repo";
 import { RegisterUser } from "../types/user";
 import { ApiResponse } from "../utils/ApiResponse";
 import { hash, compare } from "bcrypt"
 import generateToken from "../utils/generateToken";
 
-class Service {
-    private repository: Repository;
+class AuthService {
+    private repository: AuthRepository;
     constructor(){
-        this.repository = new Repository();
+        this.repository = new AuthRepository();
     }
 
     async registerUser(data: RegisterUser){
@@ -47,7 +47,7 @@ class Service {
             return {response: new ApiResponse(500, error, "Internal Server Error"), accessToken: null, refreshToken: null};
         }
     }
-    // TODO: Add getUserProfile service method
+
     async getUserProfile(userId: string){
         try {
             const user = await this.repository.getUserById(userId);
@@ -75,4 +75,4 @@ class Service {
 
 }
 
-export default Service;
+export default AuthService;

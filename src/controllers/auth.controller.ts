@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import Service from "../service";
+import AuthService from "../service/auth.service";
 import { loginUserSchema, registerUserSchema } from "../validation";
 import { ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import { AuthenticatedRequest } from "../types/request";
 
-class Controller {
-  private service: Service;
+class AuthController {
+  private service: AuthService;
   constructor() {
-    this.service = new Service();
+    this.service = new AuthService();
   }
 
   async registerUser(req: Request, res: Response) {
@@ -101,4 +101,4 @@ class Controller {
   // TODO: Add change password controller method
 }
 
-export default Controller;
+export default AuthController;
