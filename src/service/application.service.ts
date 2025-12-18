@@ -2,6 +2,7 @@ import ApplicationRepository from "../repository/application.repo";
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { ApiResponse } from "../utils/ApiResponse";
+import slugify from "../utils/slugCreater";
 class ApplicationService {
     private repository: ApplicationRepository;
     constructor(){
@@ -10,7 +11,7 @@ class ApplicationService {
 
     async registerApplication(name: string, redirectUrls: string[]){
         try {
-            const clientId = crypto.randomUUID();
+            const clientId = slugify(name) + '-' + Math.random().toString(36).substring(2, 5);
             const rawClientSecret = crypto.randomBytes(32).toString('hex');
             const hashedSecret = await bcrypt.hash(rawClientSecret, 12);
             const application = await this.repository.registerApplication({

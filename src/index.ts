@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.route';
 import applicationRouter from './routes/application.route';
+import oauthRouter from './routes/oauth.route';
 import helmet from "helmet";
 import cors from "cors";
 
@@ -35,6 +36,7 @@ app.use(cookieParser());
 
 app.use('/auth', authRouter);
 app.use('/application', applicationRouter);
+app.use('/oauth', oauthRouter);
 
 app.get('/', (req,res) => {
     res.send('Everything working fine!');

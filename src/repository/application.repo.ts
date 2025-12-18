@@ -10,6 +10,14 @@ class ApplicationRepository{
             }
         })
     }
+
+    async getApplicationByClientId(clientId: string){
+        return await prisma.applications.findUnique({
+            where: {
+                clientId
+            }
+        })
+    }
 }
 
 export default ApplicationRepository;
