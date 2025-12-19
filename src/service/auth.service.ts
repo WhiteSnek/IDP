@@ -31,7 +31,6 @@ class AuthService {
       const user = await this.repository.createUser(data);
       return new ApiResponse(201, user, "User registered successfully");
     } catch (error) {
-      console.log(error);
       return new ApiResponse(500, {}, "Internal Server Error");
     }
   }
@@ -65,7 +64,6 @@ class AuthService {
         refreshToken,
       };
     } catch (error) {
-      console.log(error);
       return {
         response: new ApiResponse(500, error, "Internal Server Error"),
         accessToken: null,

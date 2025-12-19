@@ -28,7 +28,6 @@ class AuthController {
             )
           );
       }
-      console.log(error);
       return res
         .status(500)
         .json(new ApiResponse(500, {}, "Internal server error!"));
@@ -45,7 +44,6 @@ class AuthController {
           data.ISD_code || "",
           data.password
         );
-        console.log("Setting cookies with tokens:", { accessToken, refreshToken });
       res
         .cookie("accessToken", accessToken, { httpOnly: true })
         .cookie("refreshToken", refreshToken, { httpOnly: true })
@@ -63,7 +61,6 @@ class AuthController {
             )
           );
       }
-      console.log(error);
       return res
         .status(500)
         .json(new ApiResponse(500, error, "Internal server error!"));
@@ -72,7 +69,6 @@ class AuthController {
 
   async logoutUser(req: AuthenticatedRequest, res: Response) {
     try {
-        console.log(req.id)
         return res.cookie("accessToken", "", { httpOnly: true, maxAge: 0 })
            .cookie("refreshToken", "", { httpOnly: true, maxAge: 0 })
            .status(200)

@@ -25,7 +25,6 @@ class OAuthController {
       params.client_id as string,
       params.redirect_uri as string
     );
-    console.log(client);
     if (!client.clientId) {
       return res
         .status(400)

@@ -14,17 +14,13 @@ class OAuthService {
         try {
             const client = await this.appRepository.getApplicationByClientId(clientId);
             if(!client){
-                console.log("Client not found");
                 return {clientId: null, name: null};
             }
             if(!client.redirectUrls.includes(redirectUri)){
-                console.log(redirectUri);
-                console.log("Redirect URI mismatch");
                 return {clientId: null, name: null};
             }
             return {clientId: client.clientId, name: client.name};
         } catch (error) {
-            console.log(error);
             return {clientId: null, name: null};
         }
     }

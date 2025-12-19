@@ -8,7 +8,6 @@ const middleware = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
 
   const token =
     req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
@@ -36,7 +35,6 @@ const middleware = (
         `${process.env.FRONTEND_URL}/login?redirect=${redirectUrl}`
       );
     }
-    console.error("JWT verification failed:", error);
     return res
       .status(401)
       .json(new ApiResponse(401, {}, "Unauthorized: Invalid token"));
