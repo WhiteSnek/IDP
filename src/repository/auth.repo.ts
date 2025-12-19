@@ -16,7 +16,7 @@ class AuthRepository{
     }
 
     async getUserByEmail(email: string){
-        return await prisma.user.findUnique({
+        return await prisma.user.findFirst({
             where: { email }
         })
     }

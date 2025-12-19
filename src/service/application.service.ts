@@ -31,6 +31,18 @@ class ApplicationService {
             return new ApiResponse(500, error, "Internal Server Error");
         }
     }
+
+    async getApplicationByClientId(clientId: string){
+        try {
+            const application = await this.repository.getApplicationByClientId(clientId);
+            if(!application){
+                return null;
+            }
+            return application;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default ApplicationService;

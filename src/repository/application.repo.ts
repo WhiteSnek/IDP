@@ -12,7 +12,7 @@ class ApplicationRepository{
     }
 
     async getApplicationByClientId(clientId: string){
-        return await prisma.applications.findUnique({
+        return await prisma.applications.findFirst({
             where: {
                 clientId
             }
