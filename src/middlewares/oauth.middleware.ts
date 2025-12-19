@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../types/request";
 
 const client = jwksClient({
-  jwksUri: "http://localhost:3000/oauth/.well-known/jwks.json",
+  jwksUri: `${process.env.IDP_URI}/oauth/.well-known/jwks.json`,
 });
 
 function getKey(header: any, callback: any) {
@@ -29,7 +29,7 @@ export const oauthAuthMiddleware = (
     token,
     getKey,
     {
-      issuer: "http://localhost:3000",
+      issuer: process.env.IDP_URI,
     },
     (err, decoded) => {
       if (err) {

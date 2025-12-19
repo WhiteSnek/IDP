@@ -13,11 +13,10 @@ dotenv.config({
 
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
-console.log(process.env.DATABASE_URL);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true, 
   })
 );
@@ -43,5 +42,5 @@ app.get('/', (req,res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Server is running at ${process.env.IDP_URI}`);
 })

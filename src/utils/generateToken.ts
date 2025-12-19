@@ -52,7 +52,7 @@ const generateOAuthToken = (
   const signOptions: SignOptions = {
     algorithm: "RS256",
     expiresIn: options.expiresIn,
-    issuer: "http://localhost:3000",
+    issuer: process.env.IDP_URI,
     audience: options.audience,
     keyid: "idp-key-1",
   };
