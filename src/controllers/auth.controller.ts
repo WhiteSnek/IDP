@@ -3,7 +3,7 @@ import AuthService from "../service/auth.service";
 import { loginUserSchema, registerUserSchema } from "../validation/auth.validation";
 import { ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
-import { AuthenticatedRequest } from "../types/request";
+import { AuthRequest } from "../types/request";
 
 class AuthController {
   private service: AuthService;
@@ -67,7 +67,7 @@ class AuthController {
     }
   }
 
-  async logoutUser(req: AuthenticatedRequest, res: Response) {
+  async logoutUser(req: Request, res: Response) {
     try {
         return res.cookie("accessToken", "", { httpOnly: true, maxAge: 0 })
            .cookie("refreshToken", "", { httpOnly: true, maxAge: 0 })
@@ -80,9 +80,10 @@ class AuthController {
     }
   }
 
-  async getUserProfile(req: AuthenticatedRequest, res: Response) {
+  async getUserProfile(req: Request, res: Response) {
     try {
-        const response = await this.service.getUserProfile(req.id!);
+        const userId = req.userId
+        const response = await this.service.getUserProfile(userId!);
         return res.status(response.statusCode).json(response);
     } catch (error) {
         return res

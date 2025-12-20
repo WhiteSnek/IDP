@@ -1,43 +1,49 @@
-import { Response, NextFunction } from "express";
-import jwt, { JwtPayload  } from "jsonwebtoken";
-import { ApiResponse } from "../utils/ApiResponse";
-import { AuthenticatedRequest } from "../types/request";
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { prisma } from "../config";
 
-const middleware = (
-  req: AuthenticatedRequest,
+const middleware = async (
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-
   const token =
-    req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+    req.cookies?.accessToken ||
+    req.headers.authorization?.split(" ")[1];
+
   if (!token) {
-    const redirectUrl = encodeURIComponent(req.originalUrl);
-    return res.redirect(
-      `${process.env.FRONTEND_URL}/login?redirect=${redirectUrl}`
-    );
+    return res.status(401).json({
+      message: "Authentication required",
+    });
   }
 
   try {
-    const decoded = jwt.verify(
+    const payload = jwt.verify(
       token,
-      process.env.ACCESS_TOKEN_SECRET as string
-    ) as JwtPayload;
-    req.id = decoded.id as string;
+      process.env.ACCESS_TOKEN_SECRET!
+    ) as { id: string };
 
-    return next();
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      res.clearCookie("accessToken");
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        isAdmin: true
+      },
+    });
 
-      const redirectUrl = encodeURIComponent(req.originalUrl);
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/login?redirect=${redirectUrl}`
-      );
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid session",
+      });
     }
-    return res
-      .status(401)
-      .json(new ApiResponse(401, {}, "Unauthorized: Invalid token"));
+
+    req.userId = user.id;
+    req.isAdmin = user.isAdmin;
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
   }
 };
 

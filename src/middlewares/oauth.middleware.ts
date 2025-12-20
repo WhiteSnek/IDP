@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
 import { Request, Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types/request";
 
 const client = jwksClient({
   jwksUri: `${process.env.IDP_URI}/oauth/.well-known/jwks.json`,
@@ -14,7 +13,7 @@ function getKey(header: any, callback: any) {
 }
 
 export const oauthAuthMiddleware = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -36,7 +35,7 @@ export const oauthAuthMiddleware = (
         return res.status(401).json({ error: "Invalid or expired token" });
       }
 
-      req.id = decoded?.sub as string;
+      req.userId = decoded?.sub as string;
       next();
     }
   );

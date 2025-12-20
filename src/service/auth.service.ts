@@ -52,8 +52,8 @@ class AuthService {
       if (!checkPassword) {
         return { response: new ApiResponse(401, {}, "Invalid credentials") };
       }
-      const accessToken = generateToken({ id: user.id }, "access");
-      const refreshToken = generateToken({ id: user.id }, "refresh");
+      const accessToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "access");
+      const refreshToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "refresh");
       return {
         response: new ApiResponse(
           200,
@@ -85,6 +85,7 @@ class AuthService {
         last_name: user.last_name,
         phone_no: user.phone_no,
         ISD_code: user.ISD_code,
+        isAdmin: user.isAdmin,
       };
       return new ApiResponse(200, data, "User profile fetched successfully");
     } catch (error) {
