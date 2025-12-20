@@ -8,5 +8,5 @@ const applicationController = new ApplicationController();
 
 router.post("/register", (req, res) => applicationController.registerApplication(req, res));
 router.get("/", middleware , requireAdmin , (req, res) => applicationController.getAllApplications(req, res));
-router.delete("/", middleware , requireAdmin , (req, res) => applicationController.deleteApplication(req, res));
+router.delete("/:clientId", middleware , requireAdmin , (req, res) => applicationController.deleteApplication(req, res));
 export default router;
