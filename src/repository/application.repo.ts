@@ -29,6 +29,14 @@ class ApplicationRepository{
             }
         });
     }
+
+    async deleteApplication(clientId: string){
+        await prisma.applications.delete({
+            where: {
+                clientId
+            }
+        })
+    }
 }
 
 export default ApplicationRepository;

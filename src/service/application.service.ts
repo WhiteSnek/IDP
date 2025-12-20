@@ -57,6 +57,19 @@ class ApplicationService {
             return new ApiResponse(500, error, "Internal Server Error");
         }
     }
+
+    async deleteApplication(clientId: string){
+        try {
+            const application = await this.repository.getApplicationByClientId(clientId);
+            if(!application){
+                return new ApiResponse(404, {}, "Application not found")
+            }
+            await this.repository.deleteApplication(clientId)
+            return new ApiResponse(200,{},"Application deleted successfully")
+        } catch (error) {
+            return new ApiResponse(500, error, "Internal Server Error");
+        }
+    }
 }
 
 export default ApplicationService;

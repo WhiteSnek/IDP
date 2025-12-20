@@ -19,6 +19,12 @@ class ApplicationController {
         return res.status(response.statusCode).json(response);
     }
 
+    async deleteApplication(req: Request, res: Response){
+        const { clientId } = req.params
+        const response = await this.service.deleteApplication(clientId)
+        return res.status(response.statusCode).json(response)
+    }
+
 }
 
 export default ApplicationController;
