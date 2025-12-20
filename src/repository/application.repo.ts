@@ -18,6 +18,17 @@ class ApplicationRepository{
             }
         })
     }
+
+    async getAllApplications(){
+        return await prisma.applications.findMany({
+            select: {
+                clientId: true,
+                name: true,
+                createdAt: true,
+                redirectUrls: true
+            }
+        });
+    }
 }
 
 export default ApplicationRepository;

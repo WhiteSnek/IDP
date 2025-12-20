@@ -13,6 +13,12 @@ class ApplicationController {
         const response = await this.service.registerApplication(data.name, data.redirectUrls);
         return res.status(response.statusCode).json(response);
     }
+
+    async getAllApplications(req: Request, res: Response) {
+        const response = await this.service.getAllApplications();
+        return res.status(response.statusCode).json(response);
+    }
+
 }
 
 export default ApplicationController;

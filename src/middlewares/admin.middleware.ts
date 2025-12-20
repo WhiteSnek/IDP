@@ -1,12 +1,11 @@
-import { Response, NextFunction } from "express";
-import { AuthRequest } from "../types/request";
+import { Request, Response, NextFunction } from "express";
 
 export const requireAdmin = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.user?.isAdmin) {
+  if (!req.isAdmin) {
     return res.status(403).json({
       message: "Admin access required",
     });
