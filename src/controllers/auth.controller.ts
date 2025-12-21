@@ -8,6 +8,7 @@ import {
 import { ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import { generateToken } from "../utils/generateToken";
+import { normalizeIp } from "../utils/normalizeIp";
 
 class AuthController {
   private service: AuthService;
@@ -65,6 +66,7 @@ class AuthController {
         .status(response.statusCode)
         .json(response);
     } catch (error) {
+      console.log(error)
       if (error instanceof ZodError) {
         return res
           .status(400)

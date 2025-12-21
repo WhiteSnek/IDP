@@ -1,4 +1,4 @@
-function normalizeIp(ip?: string | null): string {
+export function normalizeIp(ip?: string | null): string {
   if (!ip) return "unknown";
 
   // Handle IPv4-mapped IPv6

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import SessionService from "../service/session.service";
 import { ApiResponse } from "../utils/ApiResponse";
+import { normalizeIp } from "../utils/normalizeIp";
 
 class SessionController {
   private service: SessionService;
