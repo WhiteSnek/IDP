@@ -10,7 +10,6 @@ const middleware = async (
   const token =
     req.cookies?.accessToken ||
     req.headers.authorization?.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({
       message: "Authentication required",
@@ -22,7 +21,6 @@ const middleware = async (
       token,
       process.env.ACCESS_TOKEN_SECRET!
     ) as { id: string };
-
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       select: {
@@ -30,7 +28,6 @@ const middleware = async (
         isAdmin: true
       },
     });
-
     if (!user) {
       return res.status(401).json({
         message: "Invalid session",

@@ -10,6 +10,7 @@ import { ApiResponse } from "../utils/ApiResponse";
 import { generateToken } from "../utils/generateToken";
 import { normalizeIp } from "../utils/normalizeIp";
 import { COOKIE_OPTIONS } from "../constants";
+import jwt from "jsonwebtoken";
 
 class AuthController {
   private service: AuthService;
@@ -134,10 +135,13 @@ class AuthController {
         .status(401)
         .json(new ApiResponse(401, {}, "Session expired"));
     }
-
+    const payload = jwt.verify(
+          refreshToken,
+          process.env.REFRESH_TOKEN_SECRET!
+        ) as { id: string, isAdmin: boolean };
     await this.sessionService.deleteSession(refreshToken)
-    const newAccessToken = generateToken({ id: req.userId, isAdmin: req.isAdmin }, "access")
-    const newRefreshToken = generateToken({ id: req.userId, isAdmin: req.isAdmin }, "refresh")
+    const newAccessToken = generateToken({ id: payload.id, isAdmin: payload.isAdmin }, "access")
+    const newRefreshToken = generateToken({ id: payload.id, isAdmin: payload.isAdmin }, "refresh")
     await this.sessionService.registerSession(session.userId, newRefreshToken, session.userAgent || "unknown" ,session.ipAddress || "unknown")
     const options: CookieOptions = COOKIE_OPTIONS;
     res
@@ -146,6 +150,7 @@ class AuthController {
         .status(200)
         .json(new ApiResponse(200, {}, "Refresh Token updated successfully"));
     } catch (error) {
+      console.log(error)
       return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
     }
   }
