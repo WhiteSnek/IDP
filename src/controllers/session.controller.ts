@@ -17,6 +17,7 @@ class SessionController {
         (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
         req.socket.remoteAddress ||
         "unknown";
+      const normalizedCurrentIp = normalizeIp(currentIp);
       const sessions = await this.service.getUserSessions(userId!);
       const response = sessions.map((session) => {
         const isExpired = session.expiresAt <= now;
@@ -31,7 +32,7 @@ class SessionController {
           isCurrentSession:
             !isExpired &&
             session.userAgent === currentUserAgent &&
-            session.ipAddress === currentIp,
+            session.ipAddress === normalizedCurrentIp,
         };
       });
 

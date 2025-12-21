@@ -48,6 +48,7 @@ class AuthController {
         (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
         req.socket.remoteAddress ||
         "unknown";
+      const normalizedIp = normalizeIp(ipAddress)
       const { response, accessToken, refreshToken } =
         await this.service.loginUser(
           data.email || "",
@@ -56,7 +57,7 @@ class AuthController {
           data.password
         );
         if(response && accessToken && refreshToken){
-          await this.sessionService.registerSession(response.data.id,refreshToken,userAgent,ipAddress)
+          await this.sessionService.registerSession(response.data.id,refreshToken,userAgent,normalizedIp)
         }
       res
         .cookie("accessToken", accessToken, { httpOnly: true })
