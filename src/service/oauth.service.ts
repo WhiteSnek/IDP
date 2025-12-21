@@ -19,9 +19,9 @@ class OAuthService {
             if(!client.redirectUrls.includes(redirectUri)){
                 return {clientId: null, name: null};
             }
-            return {clientId: client.clientId, name: client.name};
+            return {clientId: client.clientId, name: client.name, id: client.id};
         } catch (error) {
-            return {clientId: null, name: null};
+            return {clientId: null, name: null, id: null};
         }
     }
 

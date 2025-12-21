@@ -7,48 +7,63 @@ import { pemToJwk } from "../utils/pemToJwk";
 import AuthService from "../service/auth.service";
 import { ApiResponse } from "../utils/ApiResponse";
 import jwt from "jsonwebtoken";
+import UserApplicationService from "../service/user.application.service";
 
 class OAuthController {
   private service: OAuthService;
   private authService: AuthService;
+  private userAppService: UserApplicationService;
   constructor() {
     this.service = new OAuthService();
     this.authService = new AuthService();
+    this.userAppService = new UserApplicationService();
   }
   async authorize(req: Request, res: Response) {
-    const params = req.query;
-    const token = req.cookies.accessToken;
-    if (!token) {
-      const continueUrl = encodeURIComponent(req.originalUrl);
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`
+    try {
+      const params = req.query;
+      const token = req.cookies.accessToken;
+      if (!token) {
+        this.redirectToLogin(req, res);
+      }
+      const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+        id: string;
+      };
+      req.userId = payload.id;
+      if (params.response_type !== "code") {
+        return res.status(400).json({ error: "Unsupported response_type" });
+      }
+      const client = await this.service.validateClient(
+        params.client_id as string,
+        params.redirect_uri as string
       );
+      if (!client.clientId) {
+        return res
+          .status(400)
+          .json({ error: "Invalid client_id or redirect_uri" });
+      }
+      const code = crypto.randomBytes(20).toString("hex");
+      await this.userAppService.registerApplication(payload.id, client.id);
+      await this.service.generateAuthCode(
+        code,
+        client.clientId as string,
+        params.redirect_uri as string,
+        req.userId as string,
+        params.state as string
+      );
+      res.redirect(`${params.redirect_uri}?code=${code}&state=${params.state}`);
+    } catch (err) {
+      if (err instanceof jwt.TokenExpiredError) {
+        console.log("Access token expired");
+        return this.redirectToLogin(req, res);
+      }
+
+      if (err instanceof jwt.JsonWebTokenError) {
+        console.log("Invalid access token");
+        return this.redirectToLogin(req, res);
+      }
+
+      return res.status(500).json({ message: "Authentication failed" });
     }
-    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
-      id: string;
-    };
-    req.userId = payload.id;
-    if (params.response_type !== "code") {
-      return res.status(400).json({ error: "Unsupported response_type" });
-    }
-    const client = await this.service.validateClient(
-      params.client_id as string,
-      params.redirect_uri as string
-    );
-    if (!client.clientId) {
-      return res
-        .status(400)
-        .json({ error: "Invalid client_id or redirect_uri" });
-    }
-    const code = crypto.randomBytes(20).toString("hex");
-    await this.service.generateAuthCode(
-      code,
-      client.clientId as string,
-      params.redirect_uri as string,
-      req.userId as string,
-      params.state as string
-    );
-    res.redirect(`${params.redirect_uri}?code=${code}&state=${params.state}`);
   }
 
   async getToken(req: Request, res: Response) {
@@ -128,6 +143,13 @@ class OAuthController {
         .status(500)
         .json(new ApiResponse(500, error, "Internal server error!"));
     }
+  }
+
+  async redirectToLogin(req: Request, res: Response) {
+    const continueUrl = encodeURIComponent(req.originalUrl);
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`
+    );
   }
 }
 

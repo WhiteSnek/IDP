@@ -46,11 +46,11 @@ class AuthService {
         (await this.repository.getUserByEmail(email)) ||
         (await this.repository.getUserByMobile(phone_no, ISD_code));
       if (!user) {
-        return { response: new ApiResponse(401, {}, "Invalid credentials") };
+        return { response: new ApiResponse(401, {}, "Invalid credentials"), accessToken: null, refreshToken: null };
       }
       const checkPassword = await compare(password, user.password);
       if (!checkPassword) {
-        return { response: new ApiResponse(401, {}, "Invalid credentials") };
+        return { response: new ApiResponse(401, {}, "Invalid credentials"), accessToken: null, refreshToken: null };
       }
       const accessToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "access");
       const refreshToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "refresh");
