@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { CookieOptions, Request, Response } from "express";
 import AuthService from "../service/auth.service";
 import SessionService from "../service/session.service";
 import {
@@ -9,6 +9,7 @@ import { ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import { generateToken } from "../utils/generateToken";
 import { normalizeIp } from "../utils/normalizeIp";
+import { COOKIE_OPTIONS } from "../constants";
 
 class AuthController {
   private service: AuthService;
@@ -60,9 +61,10 @@ class AuthController {
         if(response && accessToken && refreshToken){
           await this.sessionService.registerSession(response.data.id,refreshToken,userAgent,normalizedIp)
         }
+        const options: CookieOptions = COOKIE_OPTIONS;
       res
-        .cookie("accessToken", accessToken, { httpOnly: true })
-        .cookie("refreshToken", refreshToken, { httpOnly: true })
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
         .status(response.statusCode)
         .json(response);
     } catch (error) {
@@ -137,9 +139,10 @@ class AuthController {
     const newAccessToken = generateToken({ id: req.userId, isAdmin: req.isAdmin }, "access")
     const newRefreshToken = generateToken({ id: req.userId, isAdmin: req.isAdmin }, "refresh")
     await this.sessionService.registerSession(session.userId, newRefreshToken, session.userAgent || "unknown" ,session.ipAddress || "unknown")
+    const options: CookieOptions = COOKIE_OPTIONS;
     res
-        .cookie("accessToken", newAccessToken, { httpOnly: true })
-        .cookie("refreshToken", newRefreshToken, { httpOnly: true })
+        .cookie("accessToken", newAccessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
         .status(200)
         .json(new ApiResponse(200, {}, "Refresh Token updated successfully"));
     } catch (error) {

@@ -17,5 +17,6 @@ router.post("/logout", middleware, loginLimiter, (req, res) => authController.lo
 router.get("/profile", middleware, (req, res) => authController.getUserProfile(req, res));
 router.post("/refresh", (req,res) => authController.refresh(req,res))
 router.get("/sessions", middleware, (req,res) => sessionController.getUserSessions(req,res))
+router.delete("/sessions/:id", middleware, (req,res) => sessionController.deleteSession(req,res))
 
 export default router;

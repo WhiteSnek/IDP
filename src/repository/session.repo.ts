@@ -39,6 +39,22 @@ class SessionRepository{
             }
         })
     }
+
+    async deleteSessionById(id: string){
+        await prisma.sessions.delete({
+            where: {
+                id
+            }
+        })
+    }
+
+    async getSessionById(id: string){
+        return await prisma.sessions.findUnique({
+            where: {
+                id
+            }
+        })
+    }
 }
 
 export default SessionRepository;
