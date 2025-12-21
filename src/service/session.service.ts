@@ -40,6 +40,10 @@ class SessionService {
     return await this.repository.getSessionByToken(hashed)
   }
 
+  async getUserSessions(userId: string){
+    return await this.repository.getUserSessions(userId)
+  }
+
 }
 
 export default SessionService;

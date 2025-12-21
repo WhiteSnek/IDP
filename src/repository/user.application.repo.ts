@@ -23,6 +23,7 @@ class UserApplicationRepository {
                 userId: true,
                 applicationId: true,
                 createdAt: true,
+                role: true,
                 user: {
                     select: {
                         email: true,
@@ -57,6 +58,7 @@ class UserApplicationRepository {
             select: {
                 userId: true,
                 applicationId: true,
+                role: true,
                 application: {
                     select: {
                         name: true,

@@ -12,6 +12,14 @@ class SessionRepository{
         return await prisma.sessions.findMany({
             where: {
                 userId
+            },
+            select: {
+                id: true,
+                userId: true,
+                userAgent: true,
+                ipAddress: true,
+                createdAt: true,
+                expiresAt: true
             }
         })
     }

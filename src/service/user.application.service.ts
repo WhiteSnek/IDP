@@ -22,6 +22,10 @@ class UserApplicationService {
     async getAllApplications(){
         return this.repository.getAllApplications()
     }
+
+    async getUserApplications(userId: string){
+        return this.repository.getUserApplications(userId)
+    }
 }
 
 export default UserApplicationService;

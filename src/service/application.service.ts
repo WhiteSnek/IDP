@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { ApiResponse } from "../utils/ApiResponse";
 import slugify from "../utils/slugCreater";
-import { formatDateTime } from "../utils/formatDateTime";
 class ApplicationService {
     private repository: ApplicationRepository;
     constructor(){
@@ -48,11 +47,7 @@ class ApplicationService {
     async getAllApplications(){
         try {
             const applications = await this.repository.getAllApplications();
-            const response = applications.map(app => ({
-        ...app,
-        createdAt: formatDateTime(app.createdAt),
-        }));
-            return new ApiResponse(200, response, "Applications fetched successfully");
+            return new ApiResponse(200, applications, "Applications fetched successfully");
         } catch (error) {
             return new ApiResponse(500, error, "Internal Server Error");
         }

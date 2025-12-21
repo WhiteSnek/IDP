@@ -17,6 +17,16 @@ class UserApplicationController {
         }
     } 
 
+    async getUserApplications(req: Request, res: Response){
+        try {
+            const userId = req.userId;
+            const applications = await this.service.getUserApplications(userId!)
+            return res.status(200).json(new ApiResponse(200, applications, "User Applications fetched"))
+        } catch (error) {
+            return res.status(500).json(new ApiResponse(500, error, "Something went Wrong!"))
+        }
+    }
+
 }
 
 export default UserApplicationController;
