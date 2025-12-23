@@ -19,7 +19,10 @@ class SessionService {
     const expiresAt = getExpiryDate(expiryTime);
 
     const hashedRefreshToken = hashToken(refreshToken);
-
+    const entry = await this.repository.getSessionByToken(hashedRefreshToken)
+    if(entry){
+      return;
+    }
     const data: SessionType = {
       userId,
       refreshToken: hashedRefreshToken,
