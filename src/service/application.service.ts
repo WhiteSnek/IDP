@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { ApiResponse } from "../utils/ApiResponse";
 import slugify from "../utils/slugCreater";
+import { ALL_CHANNELS } from "../constants";
 class ApplicationService {
     private repository: ApplicationRepository;
     constructor(){
@@ -65,6 +66,27 @@ class ApplicationService {
             return new ApiResponse(500, error, "Internal Server Error");
         }
     }
+
+    async setNotificationPermission(clientId: string, flag: boolean, channels?: string[]){
+        try {
+            if(flag){
+                if(!Array.isArray(channels) || channels.length === 0 || channels.some((c: string) => !ALL_CHANNELS.includes(c))){
+                    return new ApiResponse(400, {}, "Invalid channel")
+                }
+            }
+            const data = {
+                canSendNotifications: flag,
+                allowedChannels: flag ? channels : [],
+            }
+            await this.repository.updateApplication(clientId,data)
+            return new ApiResponse(200, {}, "Permission changed successfully")
+        } catch (error) {
+            console.log(error)
+             return new ApiResponse(500, error, "Internal Server Error");
+        }
+
+    }
+
 }
 
 export default ApplicationService;

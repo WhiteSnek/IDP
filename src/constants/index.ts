@@ -5,3 +5,5 @@ export const COOKIE_OPTIONS: CookieOptions = {
   sameSite: "lax",
   secure: false,
 };
+
+export const ALL_CHANNELS = ["email", "sms", "whatsapp", "push"]

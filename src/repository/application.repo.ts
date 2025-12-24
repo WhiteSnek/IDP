@@ -25,7 +25,9 @@ class ApplicationRepository{
                 clientId: true,
                 name: true,
                 createdAt: true,
-                redirectUrls: true
+                redirectUrls: true,
+                canSendNotifications: true,
+                allowedChannels: true
             }
         });
     }
@@ -35,6 +37,15 @@ class ApplicationRepository{
             where: {
                 clientId
             }
+        })
+    }
+
+    async updateApplication(clientId: string, data: any){
+        await prisma.applications.update({
+            where: {
+                clientId
+            },
+            data
         })
     }
 }

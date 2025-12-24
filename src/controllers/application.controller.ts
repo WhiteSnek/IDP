@@ -25,6 +25,13 @@ class ApplicationController {
         return res.status(response.statusCode).json(response)
     }
 
+    async setNotificationPermission(req: Request, res: Response){
+        const { clientId } = req.params
+        const { canSendNotifications, allowedChannels } = req.body;
+        const response = await this.service.setNotificationPermission(clientId,canSendNotifications,allowedChannels)
+        return res.status(response.statusCode).json(response)
+    }
+
 }
 
 export default ApplicationController;

@@ -50,8 +50,11 @@ class OAuthController {
         req.userId as string,
         params.state as string
       );
-      res.redirect(`${params.redirect_uri}?code=${code}&state=${params.state}`);
+      res.redirect(
+        `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`
+      );
     } catch (err) {
+      console.log(err);
       if (err instanceof jwt.TokenExpiredError) {
         console.log("Access token expired");
         return this.redirectToLogin(req, res);
@@ -67,52 +70,102 @@ class OAuthController {
   }
 
   async getToken(req: Request, res: Response) {
-    const data: TokenData = req.body;
-    const client = await this.service.validateAuthCode(
-      data.code,
-      data.client_id,
-      data.redirect_uri
-    );
-    if (!client) {
-      return res.status(400).json({
-        error: "Invalid authorization code, client_id or redirect_uri",
-      });
+    const { grant_type } = req.body;
+    console.log(grant_type);
+    switch (grant_type) {
+      case "authorization_code":
+        return this.handleAuthCode(req, res);
+      case "client_credentials":
+        return this.handleClientCredentials(req, res);
+      default:
+        return res.status(400).json({
+          error: "unsupported_grant_type",
+        });
     }
-    const isClientValid = await this.service.validateClientBySecret(
-      data.client_id,
-      data.client_secret
-    );
-    if (!isClientValid) {
-      return res.status(400).json({ error: "Invalid client credentials" });
-    }
-    const accessToken = generateOAuthToken(
-      {
-        sub: client.userId,
-        scope: client.scope,
-      },
-      {
-        audience: data.client_id,
-        expiresIn: 3600,
-      }
-    );
-    const refreshToken = generateOAuthToken(
-      {
-        sub: client.userId,
-        type: "refresh",
-      },
-      {
-        audience: data.client_id,
-        expiresIn: 604800,
-      }
-    );
+  }
 
-    const response = {
-      access_token: accessToken,
-      token_type: "Bearer",
-      expires_in: 3600,
-      refresh_token: refreshToken,
-    };
-    return res.status(200).json(response);
+  async handleAuthCode(req: Request, res: Response) {
+    try {
+      const data: TokenData = req.body;
+      const client = await this.service.validateAuthCode(
+        data.code,
+        data.client_id,
+        data.redirect_uri
+      );
+      console.log(client);
+      if (!client) {
+        return res.status(400).json({
+          error: "Invalid authorization code, client_id or redirect_uri",
+        });
+      }
+      const { valid, app } = await this.service.validateClientBySecret(
+        data.client_id,
+        data.client_secret
+      );
+      console.log(valid, app);
+      if (!valid) {
+        return res.status(400).json({ error: "Invalid client credentials" });
+      }
+      const accessToken = generateOAuthToken(
+        { sub: client.userId, scope: client.scope },
+        { audience: data.client_id, expiresIn: 3600 }
+      );
+      const refreshToken = generateOAuthToken(
+        { sub: client.userId, type: "refresh" },
+        { audience: data.client_id, expiresIn: 604800 }
+      );
+      const response = {
+        access_token: accessToken,
+        token_type: "Bearer",
+        expires_in: 3600,
+        refresh_token: refreshToken,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error });
+    }
+  }
+
+  async handleClientCredentials(req: Request, res: Response) {
+    try {
+      const data: TokenData = req.body;
+      const { valid, app } = await this.service.validateClientBySecret(
+        data.client_id,
+        data.client_secret
+      );
+      if (!valid || !app) {
+        return res.status(401).json({
+          error: "invalid_client",
+        });
+      }
+      const permissions = {
+        notification: app.canSendNotifications,
+        channels: app.allowedChannels,
+      }
+      const token = generateOAuthToken(
+        {
+          sub: data.client_id,
+          permissions,
+          type: "client_credentials",
+        },
+        {
+          audience: data.client_id,
+          expiresIn: 3600,
+        }
+      );
+      return res.status(200).json({
+        client_token: token,
+        token_type: "Bearer",
+        expires_in: 3600,
+        scope: permissions,
+      });
+    } catch (error) {
+      console.error(error);
+    return res.status(500).json({
+      error: "server_error",
+    });
+    }
   }
 
   async getJwks(req: Request, res: Response) {
@@ -144,6 +197,17 @@ class OAuthController {
         .json(new ApiResponse(500, error, "Internal server error!"));
     }
   }
+
+  // async getAppPermissions(req: Request, res: Response){
+  //   try {
+  //     const response = await this.authService.getAppPermissions();
+  //     return res.status(response.statusCode).json(response);
+  //   } catch (error) {
+  //     return res
+  //       .status(500)
+  //       .json(new ApiResponse(500, error, "Internal server error!"));
+  //   }
+  // }
 
   async redirectToLogin(req: Request, res: Response) {
     const continueUrl = encodeURIComponent(req.originalUrl);

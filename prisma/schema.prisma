@@ -56,7 +56,8 @@ model Applications {
   clientSecret String
   redirectUrls  String[]
   createdAt    DateTime @default(now())
-
+  canSendNotifications Boolean @default(false)
+  allowedChannels String[]
   // Relations
   userApplications UserApplications[]
 }

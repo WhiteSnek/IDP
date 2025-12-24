@@ -55,10 +55,10 @@ class OAuthService {
     async validateClientBySecret(clientId: string, clientSecret: string){
         const client = await this.appRepository.getApplicationByClientId(clientId);
         if(!client){
-            return false;
+            return {valid: false , app: null};
         }
         const isValid = bcrypt.compare(clientSecret, client.clientSecret);
-        return isValid;
+        return {valid: isValid, app: client};
     }
 }
 
