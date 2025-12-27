@@ -8,6 +8,7 @@ import AuthService from "../service/auth.service";
 import { ApiResponse } from "../utils/ApiResponse";
 import jwt from "jsonwebtoken";
 import UserApplicationService from "../service/user.application.service";
+import { Permissions } from "../types/permissions";
 
 class OAuthController {
   private service: OAuthService;
@@ -108,11 +109,11 @@ class OAuthController {
       }
       const accessToken = generateOAuthToken(
         { sub: client.userId, scope: client.scope },
-        { audience: data.client_id, expiresIn: 3600 }
+        { audience: [data.client_id], expiresIn: 3600 }
       );
       const refreshToken = generateOAuthToken(
         { sub: client.userId, type: "refresh" },
-        { audience: data.client_id, expiresIn: 604800 }
+        { audience: [data.client_id], expiresIn: 604800 }
       );
       const response = {
         access_token: accessToken,
@@ -139,7 +140,7 @@ class OAuthController {
           error: "invalid_client",
         });
       }
-      const permissions = {
+      const permissions: Permissions = {
         notification: app.canSendNotifications,
         channels: app.allowedChannels,
       }
@@ -150,7 +151,7 @@ class OAuthController {
           type: "client_credentials",
         },
         {
-          audience: data.client_id,
+          audience: [data.client_id, "notification_service"],
           expiresIn: 3600,
         }
       );

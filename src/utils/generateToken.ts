@@ -38,7 +38,7 @@ const generateToken = (payload: object, type: "access" | "refresh") => {
 const generateOAuthToken = (
   payload: object,
   options: {
-    audience: string;
+    audience: string[];
     expiresIn: number;
   }
 ) => {

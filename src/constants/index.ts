@@ -7,3 +7,5 @@ export const COOKIE_OPTIONS: CookieOptions = {
 };
 
 export const ALL_CHANNELS = ["email", "sms", "whatsapp", "push"]
+
+export const NOTIFICATION_PERMISSION = true

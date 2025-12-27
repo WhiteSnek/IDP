@@ -8,7 +8,6 @@ import userAppRouter from './routes/user.application.route'
 import helmet from "helmet";
 import cors from "cors";
 import { requestLogger } from './utils/requestLogger';
-
 dotenv.config({
   path: './.env'
 });
