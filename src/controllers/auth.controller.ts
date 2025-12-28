@@ -179,7 +179,6 @@ class AuthController {
   async verifyEmailOTP(req: Request, res:Response){
     try {
       const {otp, email} = req.body;
-      const userId = req.userId
       if(!otp || !email){
         return res.status(400).json(new ApiResponse(400,{},"All fields are required!"))
       }
@@ -190,6 +189,8 @@ class AuthController {
       const data = {
         is_email_verified: true
       }
+      const user = await this.service.getUserByEmail(email)
+      const userId = user?.id
       await this.service.updateUser(userId!, data)
       return res.status(200).json(new ApiResponse(200, {}, "Email verified successfully"))
     } catch (error) {

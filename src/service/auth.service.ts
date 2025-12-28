@@ -96,6 +96,11 @@ class AuthService {
       return new ApiResponse(500, error, "Internal Server Error");
     }
   }
+
+  async getUserByEmail(email: string){
+    return await this.repository.getUserByEmail(email)
+  }
+
   // TODO: Add updateUserProfile service method
   async updateUser(userId: string, data: any){
     await prisma.user.update({
