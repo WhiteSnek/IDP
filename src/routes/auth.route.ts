@@ -19,5 +19,6 @@ router.post("/refresh", (req,res) => authController.refresh(req,res))
 router.get("/sessions", middleware, (req,res) => sessionController.getUserSessions(req,res))
 router.delete("/sessions/:id", middleware, (req,res) => sessionController.deleteSession(req,res))
 router.post("/otp/email", middleware, (req,res) => authController.sendOtpToEmail(req,res))
+router.post("/verify/otp/email", middleware, (req,res) => authController.verifyEmailOTP(req,res))
 
 export default router;

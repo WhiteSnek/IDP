@@ -64,6 +64,23 @@ class NotificationService {
       );
     }
   }
+
+  async verifyEmailOtp(otp: string, email: string): Promise<boolean>{
+    const user = await this.authRepo.getUserByEmail(email)
+    if(!user){
+        return false
+    }
+    const userId = user.id
+    const entry = await this.tokenRepo.findOtp(otp, userId)
+    if(!entry){
+        return false;
+    }
+    if(entry.expiresAt < new Date()){
+        return false
+    }
+    await this.tokenRepo.deleteOtp(entry.id)
+    return true;
+  }
 }
 
 export default NotificationService;

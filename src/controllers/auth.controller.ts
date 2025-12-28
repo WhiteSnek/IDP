@@ -160,12 +160,33 @@ class AuthController {
 
   async sendOtpToEmail(req: Request, res:Response){
     try {
+      console.log(req.body)
       const {email} = req.body;
+      if(!email){
+        return res.status(400).json(new ApiResponse(400,{},"Email is required"))
+      }
       const response = await this.notificationService.sendOtpToEmail(email)
       if(!response){
         return res.status(400).json(new ApiResponse(400,{},"Failed to send otp to email"))
       }
       return res.status(200).json(new ApiResponse(200,{},"Otp sent successfully!"))
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
+    }
+  }
+
+  async verifyEmailOTP(req: Request, res:Response){
+    try {
+      const {otp, email} = req.body;
+      if(!otp || !email){
+        return res.status(400).json(new ApiResponse(400,{},"All fields are required!"))
+      }
+      const verified = await this.notificationService.verifyEmailOtp(otp, email)
+      if(!verified){
+        return res.status(401).json(new ApiResponse(401, {}, "Otp is incorrect or expired"))
+      }
+      return res.status(200).json(new ApiResponse(200, {}, "Email verified successfully"))
     } catch (error) {
       return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
     }
