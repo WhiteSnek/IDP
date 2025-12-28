@@ -87,6 +87,8 @@ class AuthService {
         phone_no: user.phone_no,
         ISD_code: user.ISD_code,
         isAdmin: user.isAdmin,
+        is_email_verified: user.is_email_verified,
+        is_phone_verified: user.is_phone_verified
       };
       return new ApiResponse(200, data, "User profile fetched successfully");
     } catch (error) {

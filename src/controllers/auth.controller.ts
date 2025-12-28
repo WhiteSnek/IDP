@@ -5,19 +5,22 @@ import {
   loginUserSchema,
   registerUserSchema,
 } from "../validation/auth.validation";
-import { ZodError } from "zod";
+import { email, ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import { generateToken } from "../utils/generateToken";
 import { normalizeIp } from "../utils/normalizeIp";
 import { COOKIE_OPTIONS } from "../constants";
 import jwt from "jsonwebtoken";
+import NotificationService from "../service/notification.service";
 
 class AuthController {
   private service: AuthService;
   private sessionService: SessionService;
+  private notificationService: NotificationService;
   constructor() {
     this.service = new AuthService();
     this.sessionService = new SessionService()
+    this.notificationService = new NotificationService()
   }
 
   async registerUser(req: Request, res: Response) {
@@ -151,6 +154,19 @@ class AuthController {
         .json(new ApiResponse(200, {}, "Refresh Token updated successfully"));
     } catch (error) {
       console.log(error)
+      return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
+    }
+  }
+
+  async sendOtpToEmail(req: Request, res:Response){
+    try {
+      const {email} = req.body;
+      const response = await this.notificationService.sendOtpToEmail(email)
+      if(!response){
+        return res.status(400).json(new ApiResponse(400,{},"Failed to send otp to email"))
+      }
+      return res.status(200).json(new ApiResponse(200,{},"Otp sent successfully!"))
+    } catch (error) {
       return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
     }
   }

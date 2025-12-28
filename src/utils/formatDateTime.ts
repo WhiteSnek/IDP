@@ -1,10 +1,16 @@
-export const formatDateTime = (dateInput: Date | string): string => {
-  const date =
-    typeof dateInput === "string"
-      ? new Date(dateInput)
-      : dateInput;
+export function expiresAtToExpiresIn(expiresAt: Date): string {
+  const now = Date.now();
+  const diffMs = expiresAt.getTime() - now;
 
-  const pad = (n: number) => n.toString().padStart(2, "0");
+  if (diffMs <= 0) return "expired";
 
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
+  const totalSeconds = Math.floor(diffMs / 1000);
+
+  const minutes = Math.floor(totalSeconds / 60);
+  if (minutes > 0) {
+    return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+  }
+
+  const seconds = totalSeconds % 60;
+  return `${seconds} second${seconds > 1 ? "s" : ""}`;
+}

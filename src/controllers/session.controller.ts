@@ -51,7 +51,7 @@ class SessionController {
   async deleteSession(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = req.userId
+      const userId = req.userId;
       const response = await this.service.deleteSessionById(id, userId!);
       return res.status(response.statusCode).json(response);
     } catch (error) {
