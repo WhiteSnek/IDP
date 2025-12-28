@@ -179,6 +179,7 @@ class AuthController {
   async verifyEmailOTP(req: Request, res:Response){
     try {
       const {otp, email} = req.body;
+      const userId = req.userId
       if(!otp || !email){
         return res.status(400).json(new ApiResponse(400,{},"All fields are required!"))
       }
@@ -186,6 +187,10 @@ class AuthController {
       if(!verified){
         return res.status(401).json(new ApiResponse(401, {}, "Otp is incorrect or expired"))
       }
+      const data = {
+        is_email_verified: true
+      }
+      await this.service.updateUser(userId!, data)
       return res.status(200).json(new ApiResponse(200, {}, "Email verified successfully"))
     } catch (error) {
       return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))

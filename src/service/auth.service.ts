@@ -3,6 +3,7 @@ import { RegisterUser } from "../types/user";
 import { ApiResponse } from "../utils/ApiResponse";
 import { hash, compare } from "bcrypt";
 import { generateToken } from "../utils/generateToken";
+import { prisma } from "../config";
 
 class AuthService {
   private repository: AuthRepository;
@@ -96,6 +97,14 @@ class AuthService {
     }
   }
   // TODO: Add updateUserProfile service method
+  async updateUser(userId: string, data: any){
+    await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data
+    })
+  }
   // TODO: Add deleteUser service method
   // TODO: Add validate email service method
   // TODO: Add validate phone number service method
