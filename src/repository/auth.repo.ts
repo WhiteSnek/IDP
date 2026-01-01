@@ -21,9 +21,9 @@ class AuthRepository{
         })
     }
 
-    async getUserByMobile(phone_no: string, ISD_code: string){
+    async getUserByMobile(phone: string){
         return await prisma.user.findFirst({
-            where: { phone_no, ISD_code }
+            where: { phone }
         })
     }
     

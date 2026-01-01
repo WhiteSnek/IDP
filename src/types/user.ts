@@ -3,8 +3,7 @@ export interface RegisterUser {
     password: string;
     first_name: string;
     last_name: string;
-    phone_no: string;
-    ISD_code: string;
+    phone: string;
 }
 
 export interface User {
@@ -12,7 +11,6 @@ export interface User {
     email: string;
     first_name: string;
     last_name: string;
-    phone_no: string;
-    ISD_code: string;
+    phone: string;
     isAdmin: boolean;
 }

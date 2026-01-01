@@ -13,23 +13,29 @@ class NotificationService {
     this.authRepo = new AuthRepository();
   }
 
-  async sendOtpToEmail(email: string): Promise<boolean> {
+  async sendOtp(receiver: string, channel: "email" | "sms"): Promise<boolean> {
     const notificationUri = process.env.NOTIFICATION_URI;
     if (!notificationUri) {
       throw new Error("NOTIFICATION_URI not configured");
     }
-
-    const user = await this.authRepo.getUserByEmail(email);
-    if (!user) {
-      return false;
+    let user = null;
+    if(channel === 'email'){
+      user = await this.authRepo.getUserByEmail(receiver);
+      if (!user) {
+        return false;
+      }
+    } else {
+      user = await this.authRepo.getUserByMobile(receiver);
+      if (!user) {
+        return false;
+      }
     }
-
     const { otp, expiresAt } = await this.tokenRepo.createOtp(user.id);
 
     const payload = {
       userId: user.id,
       clientId: "idp",
-      reciever: email,
+      reciever: receiver,
       eventType: "AUTH_OTP",
       data: {
         variables: {
@@ -38,6 +44,8 @@ class NotificationService {
           service: "IDP",
         },
       },
+      channels: [channel],
+      priority: "high"
     };
 
     const token = generateIDPToken();
@@ -65,10 +73,18 @@ class NotificationService {
     }
   }
 
-  async verifyEmailOtp(otp: string, email: string): Promise<boolean>{
-    const user = await this.authRepo.getUserByEmail(email)
-    if(!user){
-        return false
+  async verifyOtp(otp: string, receiver: string, channel: "email" | "sms"): Promise<boolean>{
+    let user = null;
+    if(channel === 'email'){
+      user = await this.authRepo.getUserByEmail(receiver);
+      if (!user) {
+        return false;
+      }
+    } else {
+      user = await this.authRepo.getUserByMobile(receiver);
+      if (!user) {
+        return false;
+      }
     }
     const userId = user.id
     const entry = await this.tokenRepo.findOtp(otp, userId)

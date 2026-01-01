@@ -18,8 +18,7 @@ class AuthService {
         return new ApiResponse(409, {}, "User with this email already exists");
       }
       existingUser = await this.repository.getUserByMobile(
-        data.phone_no,
-        data.ISD_code
+        data.phone
       );
       if (existingUser) {
         return new ApiResponse(
@@ -38,14 +37,13 @@ class AuthService {
 
   async loginUser(
     email: string | "",
-    phone_no: string | "",
-    ISD_code: string | "",
+    phone: string | "",
     password: string
   ) {
     try {
       const user =
         (await this.repository.getUserByEmail(email)) ||
-        (await this.repository.getUserByMobile(phone_no, ISD_code));
+        (await this.repository.getUserByMobile(phone));
       if (!user) {
         return { response: new ApiResponse(401, {}, "Invalid credentials"), accessToken: null, refreshToken: null };
       }
@@ -85,8 +83,7 @@ class AuthService {
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
-        phone_no: user.phone_no,
-        ISD_code: user.ISD_code,
+        phone: user.phone,
         isAdmin: user.isAdmin,
         is_email_verified: user.is_email_verified,
         is_phone_verified: user.is_phone_verified

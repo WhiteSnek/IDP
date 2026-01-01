@@ -13,26 +13,27 @@ datasource db {
   provider = "postgresql"
   // url      = env("DATABASE_URL")
 }
+
 // table to store basic user information
 model User {
-  id                String      @id @default(cuid())
-  email             String      @unique
-  password          String
-  first_name        String
-  last_name         String
-  phone_no          String
-  ISD_code          String
-  is_email_verified Boolean     @default(false)
-  is_phone_verified Boolean     @default(false)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  isAdmin          Boolean     @default(false)
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  password           String
+  first_name         String
+  last_name          String
+  phone              String               @unique
+  is_email_verified  Boolean              @default(false)
+  is_phone_verified  Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  isAdmin            Boolean              @default(false)
   // Relations
-  sessions          Sessions[]
-  userApplications  UserApplications[]
-  oauthProviders    OAuthProviders[]
+  sessions           Sessions[]
+  userApplications   UserApplications[]
+  oauthProviders     OAuthProviders[]
   verificationTokens VerificationTokens[]
 }
+
 // table to store user sessions on different devices
 model Sessions {
   id           String   @id @default(cuid())
@@ -44,74 +45,78 @@ model Sessions {
   createdAt    DateTime @default(now())
 
   // Relations
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
+
 // table to store service applications
 model Applications {
-  id           String   @id @default(cuid())
-  name         String
-  clientId     String   @unique
-  clientSecret String
-  redirectUrls  String[]
-  createdAt    DateTime @default(now())
-  canSendNotifications Boolean @default(false)
-  allowedChannels String[]
+  id                   String             @id @default(cuid())
+  name                 String
+  clientId             String             @unique
+  clientSecret         String
+  redirectUrls         String[]
+  createdAt            DateTime           @default(now())
+  canSendNotifications Boolean            @default(false)
+  allowedChannels      String[]
   // Relations
-  userApplications UserApplications[]
+  userApplications     UserApplications[]
 }
+
 // junction table to link users and applications with roles
 model UserApplications {
-  id             String        @id @default(cuid())
-  userId         String
-  applicationId  String
-  role           Role          @default(USER)
-  createdAt      DateTime      @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  applicationId String
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now())
 
   // Relations
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  application    Applications  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Applications @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([userId, applicationId])
 }
+
 // table to store OAuth provider information for users
 model OAuthProviders {
-  id              String   @id @default(cuid())
-  userId          String
-  provider        String
-  providerUserId  String
-  accessToken     String
-  refreshToken    String?
+  id             String  @id @default(cuid())
+  userId         String
+  provider       String
+  providerUserId String
+  accessToken    String
+  refreshToken   String?
 
   // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 // table to store verification tokens for email/phone verification and password resets
 model VerificationTokens {
-  id         String   @id @default(cuid())
-  userId     String
-  token      String   @unique
-  type       String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
   // Relations
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model AuthorizationCodes {
-  id           String   @id @default(cuid())
-  code         String   @unique
-  userId       String
-  clientId     String
-  redirectUri  String
-  state        String?
-  scope        String?
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
+  id          String   @id @default(cuid())
+  code        String   @unique
+  userId      String
+  clientId    String
+  redirectUri String
+  state       String?
+  scope       String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
   used        Boolean  @default(false)
 }
 

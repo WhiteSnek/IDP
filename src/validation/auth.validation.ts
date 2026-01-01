@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+const phoneSchema = z
+  .string()
+  .regex(/^\+[1-9]\d{7,14}$/, "Phone must be in E.164 format (e.g. +919876543210)");
+
 const registerUserSchema = z.object({
   email: z.string().email("Invalid email address"),
 
@@ -18,29 +22,17 @@ const registerUserSchema = z.object({
 
   last_name: z.string().min(1, "Last name is required"),
 
-  ISD_code: z
-    .string()
-    .regex(/^\+(?:\d{1,3})(?:\s\d{1,3})*$/, "Invalid ISD code")
-    .refine((v) => v.replace(/\D/g, "").length <= 6, "Invalid ISD code"),
-
-  phone_no: z.string().regex(/^[1-9]\d{6,14}$/, "Invalid phone number"),
+  phone: phoneSchema,
 });
 
 const loginUserSchema = z
   .object({
     email: z.email().optional(),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    phone_no: z
-      .string()
-      .regex(/^[0-9]{10}$/, "Mobile number must be digits only (10 digits)")
-      .optional(),
-    ISD_code: z
-      .string()
-      .regex(/^\+\d{1,3}$/, "ISD Code must be like +91, +1, +44")
-      .optional(),
+    phone: phoneSchema.optional(),
   })
-  .refine((data) => !!data.email || (!!data.phone_no && !!data.ISD_code), {
-    message: "Either email or both ISD code and phone number must be provided",
+  .refine((data) => !!data.email || (!!data.phone), {
+    message: "Either email or phone number must be provided",
     path: ["email"],
   });
 

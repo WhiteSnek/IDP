@@ -58,8 +58,7 @@ class AuthController {
       const { response, accessToken, refreshToken } =
         await this.service.loginUser(
           data.email || "",
-          data.phone_no || "",
-          data.ISD_code || "",
+          data.phone || "",
           data.password
         );
         if(response && accessToken && refreshToken){
@@ -165,7 +164,7 @@ class AuthController {
       if(!email){
         return res.status(400).json(new ApiResponse(400,{},"Email is required"))
       }
-      const response = await this.notificationService.sendOtpToEmail(email)
+      const response = await this.notificationService.sendOtp(email, "email")
       if(!response){
         return res.status(400).json(new ApiResponse(400,{},"Failed to send otp to email"))
       }
@@ -182,7 +181,7 @@ class AuthController {
       if(!otp || !email){
         return res.status(400).json(new ApiResponse(400,{},"All fields are required!"))
       }
-      const verified = await this.notificationService.verifyEmailOtp(otp, email)
+      const verified = await this.notificationService.verifyOtp(otp, email, "email")
       if(!verified){
         return res.status(401).json(new ApiResponse(401, {}, "Otp is incorrect or expired"))
       }
