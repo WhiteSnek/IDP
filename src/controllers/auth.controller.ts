@@ -157,16 +157,16 @@ class AuthController {
     }
   }
 
-  async sendOtpToEmail(req: Request, res:Response){
+  async sendOtp(req: Request, res:Response){
     try {
-      console.log(req.body)
-      const {email} = req.body;
-      if(!email){
-        return res.status(400).json(new ApiResponse(400,{},"Email is required"))
+      const {channel} = req.params
+      const {receiver} = req.body;
+      if(!receiver){
+        return res.status(400).json(new ApiResponse(400,{},"Receiver is required"))
       }
-      const response = await this.notificationService.sendOtp(email, "email")
+      const response = await this.notificationService.sendOtp(receiver, channel as "email" | "sms")
       if(!response){
-        return res.status(400).json(new ApiResponse(400,{},"Failed to send otp to email"))
+        return res.status(400).json(new ApiResponse(400,{},`Failed to send otp to ${channel}`))
       }
       return res.status(200).json(new ApiResponse(200,{},"Otp sent successfully!"))
     } catch (error) {
@@ -175,23 +175,37 @@ class AuthController {
     }
   }
 
-  async verifyEmailOTP(req: Request, res:Response){
+  async verifyOTP(req: Request, res:Response){
     try {
-      const {otp, email} = req.body;
-      if(!otp || !email){
+      const {channel} = req.params
+      const {otp, receiver} = req.body;
+      if(!otp || !receiver){
         return res.status(400).json(new ApiResponse(400,{},"All fields are required!"))
       }
-      const verified = await this.notificationService.verifyOtp(otp, email, "email")
+      const verified = await this.notificationService.verifyOtp(otp, receiver, channel as "email" | "sms")
       if(!verified){
         return res.status(401).json(new ApiResponse(401, {}, "Otp is incorrect or expired"))
       }
-      const data = {
-        is_email_verified: true
+      let data;
+      if(channel === "email"){
+        data = {
+          is_email_verified: true
+        }
+      } else {
+        data = {
+          is_phone_verified: true
+        }
       }
-      const user = await this.service.getUserByEmail(email)
+      let user;
+      if(channel === "email"){
+        user = await this.service.getUserByEmail(receiver)
+      }
+      else {
+        user = await this.service.getUserByMobile(receiver)
+      }
       const userId = user?.id
       await this.service.updateUser(userId!, data)
-      return res.status(200).json(new ApiResponse(200, {}, "Email verified successfully"))
+      return res.status(200).json(new ApiResponse(200, {}, `${channel === "email" ? "Email" : "Phone"} verified successfully`))
     } catch (error) {
       return res.status(500).json(new ApiResponse(500, error, "Internal Server Error"))
     }

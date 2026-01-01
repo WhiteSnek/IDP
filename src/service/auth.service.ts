@@ -98,6 +98,10 @@ class AuthService {
     return await this.repository.getUserByEmail(email)
   }
 
+  async getUserByMobile(phone: string){
+    return await this.repository.getUserByMobile(phone)
+  }
+
   // TODO: Add updateUserProfile service method
   async updateUser(userId: string, data: any){
     await prisma.user.update({
