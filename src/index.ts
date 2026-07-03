@@ -8,6 +8,7 @@ import userAppRouter from './routes/user.application.route'
 import helmet from "helmet";
 import cors from "cors";
 import { requestLogger } from './utils/requestLogger';
+import serverless from "serverless-http";
 dotenv.config({
   path: './.env'
 });
@@ -57,6 +58,10 @@ app.get('/', (req,res) => {
     res.send('Everything working fine!');
 })
 
-app.listen(PORT, () => {
-    console.log(`Server is running at ${process.env.IDP_URI}`);
-})
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export const handler = serverless(app);
