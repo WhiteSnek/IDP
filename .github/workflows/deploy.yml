@@ -59,14 +59,21 @@ jobs:
             dist \
             node_modules \
             prisma \
+            certs \
             package.json \
             package-lock.json
+
+      - name: Upload deployment package to S3
+        run: |
+          aws s3 cp lambda.zip \
+            s3://${{ secrets.DEPLOYMENT_BUCKET }}/lambda.zip
 
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://lambda.zip
+            --s3-bucket ${{ secrets.DEPLOYMENT_BUCKET }} \
+            --s3-key lambda.zip
 
       - name: Wait for deployment
         run: |
