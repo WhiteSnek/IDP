@@ -45,7 +45,7 @@ const generateOAuthToken = (
   if (!process.env.IDP_PRIVATE_KEY) throw new Error("IDP_PRIVATE_KEY not set");
 
   const privateKey = createPrivateKey({
-    key: Buffer.from(process.env.IDP_PRIVATE_KEY_B64!, "base64").toString("utf8"),
+    key: Buffer.from(process.env.IDP_PRIVATE_KEY!, "base64").toString("utf8"),
     format: "pem",
   });
 
