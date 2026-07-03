@@ -64,4 +64,6 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-export const handler = serverless(app);
+export const handler = serverless(app, {
+  basePath: "/v1",
+});
