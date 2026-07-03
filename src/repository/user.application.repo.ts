@@ -83,8 +83,7 @@ class UserApplicationRepository {
                         first_name: true,
                         last_name: true,
                         createdAt: true,
-                        phone_no: true,
-                        ISD_code: true
+                        phone: true,
                     }
                 }
             }
