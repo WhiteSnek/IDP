@@ -35,7 +35,7 @@ class OAuthController {
       }
       const client = await this.service.validateClient(
         params.client_id as string,
-        params.redirect_uri as string
+        params.redirect_uri as string,
       );
       if (!client.clientId) {
         return res
@@ -49,10 +49,10 @@ class OAuthController {
         client.clientId as string,
         params.redirect_uri as string,
         req.userId as string,
-        params.state as string
+        params.state as string,
       );
       res.redirect(
-        `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`
+        `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`,
       );
     } catch (err) {
       console.log(err);
@@ -91,7 +91,7 @@ class OAuthController {
       const client = await this.service.validateAuthCode(
         data.code,
         data.client_id,
-        data.redirect_uri
+        data.redirect_uri,
       );
       console.log(client);
       if (!client) {
@@ -101,7 +101,7 @@ class OAuthController {
       }
       const { valid, app } = await this.service.validateClientBySecret(
         data.client_id,
-        data.client_secret
+        data.client_secret,
       );
       console.log(valid, app);
       if (!valid) {
@@ -109,11 +109,11 @@ class OAuthController {
       }
       const accessToken = generateOAuthToken(
         { sub: client.userId, scope: client.scope },
-        { audience: [data.client_id], expiresIn: 3600 }
+        { audience: [data.client_id], expiresIn: 3600 },
       );
       const refreshToken = generateOAuthToken(
         { sub: client.userId, type: "refresh" },
-        { audience: [data.client_id], expiresIn: 604800 }
+        { audience: [data.client_id], expiresIn: 604800 },
       );
       const response = {
         access_token: accessToken,
@@ -133,7 +133,7 @@ class OAuthController {
       const data: TokenData = req.body;
       const { valid, app } = await this.service.validateClientBySecret(
         data.client_id,
-        data.client_secret
+        data.client_secret,
       );
       if (!valid || !app) {
         return res.status(401).json({
@@ -143,7 +143,7 @@ class OAuthController {
       const permissions: Permissions = {
         notification: app.canSendNotifications,
         channels: app.allowedChannels,
-      }
+      };
       const token = generateOAuthToken(
         {
           sub: data.client_id,
@@ -153,7 +153,7 @@ class OAuthController {
         {
           audience: [data.client_id, "notification_service"],
           expiresIn: 3600,
-        }
+        },
       );
       return res.status(200).json({
         client_token: token,
@@ -163,9 +163,9 @@ class OAuthController {
       });
     } catch (error) {
       console.error(error);
-    return res.status(500).json({
-      error: "server_error",
-    });
+      return res.status(500).json({
+        error: "server_error",
+      });
     }
   }
 
@@ -174,7 +174,12 @@ class OAuthController {
       return res.status(500).json({ error: "Public key not configured" });
     }
 
-    const jwk = pemToJwk(process.env.IDP_PUBLIC_KEY.replace(/\\n/g, "\n"));
+    const publicKey = Buffer.from(
+      process.env.IDP_PUBLIC_KEY,
+      "base64",
+    ).toString("utf-8");
+
+    const jwk = pemToJwk(publicKey);
 
     res.json({
       keys: [
@@ -213,7 +218,7 @@ class OAuthController {
   async redirectToLogin(req: Request, res: Response) {
     const continueUrl = encodeURIComponent(req.originalUrl);
     return res.redirect(
-      `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`
+      `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`,
     );
   }
 }
