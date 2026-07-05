@@ -51,7 +51,8 @@ class OAuthController {
         req.userId as string,
         params.state as string,
       );
-      res.redirect(
+      console.log("Redirecting to:", `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`);
+      return res.redirect(
         `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`,
       );
     } catch (err) {
