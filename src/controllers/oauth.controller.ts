@@ -25,6 +25,7 @@ class OAuthController {
       const token = req.cookies.accessToken;
       if (!token) {
         this.redirectToLogin(req, res);
+        return;
       }
       const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
         id: string;
@@ -52,7 +53,7 @@ class OAuthController {
         params.state as string,
       );
       console.log("Redirecting to:", `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`);
-      return res.redirect(
+      res.redirect(
         `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`,
       );
     } catch (err) {
