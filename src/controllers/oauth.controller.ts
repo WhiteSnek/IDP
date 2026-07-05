@@ -20,57 +20,128 @@ class OAuthController {
     this.userAppService = new UserApplicationService();
   }
   async authorize(req: Request, res: Response) {
-    try {
-      const params = req.query;
-      const token = req.cookies.accessToken;
-      if (!token) {
-        this.redirectToLogin(req, res);
-        return;
-      }
-      const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
-        id: string;
-      };
-      req.userId = payload.id;
-      if (params.response_type !== "code") {
-        return res.status(400).json({ error: "Unsupported response_type" });
-      }
-      const client = await this.service.validateClient(
-        params.client_id as string,
-        params.redirect_uri as string,
-      );
-      if (!client.clientId) {
-        return res
-          .status(400)
-          .json({ error: "Invalid client_id or redirect_uri" });
-      }
-      const code = crypto.randomBytes(20).toString("hex");
-      await this.userAppService.registerApplication(payload.id, client.id);
-      await this.service.generateAuthCode(
-        code,
-        client.clientId as string,
-        params.redirect_uri as string,
-        req.userId as string,
-        params.state as string,
-      );
-      console.log("Redirecting to:", `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`);
-      res.redirect(
-        `${params.redirect_uri}?grant_type=${params.grant_type}&code=${code}&state=${params.state}`,
-      );
-    } catch (err) {
-      console.log(err);
-      if (err instanceof jwt.TokenExpiredError) {
-        console.log("Access token expired");
-        return this.redirectToLogin(req, res);
-      }
+  console.log("========================================");
+  console.log("[OAuth] /authorize called");
+  console.log("[OAuth] Query:", req.query);
+  console.log("[OAuth] Cookies:", req.cookies);
+  console.log("[OAuth] URL:", req.originalUrl);
 
-      if (err instanceof jwt.JsonWebTokenError) {
-        console.log("Invalid access token");
-        return this.redirectToLogin(req, res);
-      }
+  try {
+    const params = req.query;
+    const token = req.cookies.accessToken;
 
-      return res.status(500).json({ message: "Authentication failed" });
+    console.log("[OAuth] Access token exists:", !!token);
+
+    if (!token) {
+      console.log("[OAuth] No access token. Redirecting to login...");
+      return this.redirectToLogin(req, res);
     }
+
+    console.log("[OAuth] Verifying JWT...");
+
+    const payload = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET!
+    ) as { id: string };
+
+    console.log("[OAuth] JWT verified successfully");
+    console.log("[OAuth] User ID:", payload.id);
+
+    req.userId = payload.id;
+
+    console.log("[OAuth] response_type:", params.response_type);
+
+    if (params.response_type !== "code") {
+      console.log("[OAuth] Invalid response_type");
+      return res.status(400).json({
+        error: "Unsupported response_type",
+      });
+    }
+
+    console.log("[OAuth] Validating client...");
+    console.log({
+      client_id: params.client_id,
+      redirect_uri: params.redirect_uri,
+    });
+
+    const client = await this.service.validateClient(
+      params.client_id as string,
+      params.redirect_uri as string,
+    );
+
+    console.log("[OAuth] Client validation result:", client);
+
+    if (!client.clientId) {
+      console.log("[OAuth] Client validation failed");
+      return res.status(400).json({
+        error: "Invalid client_id or redirect_uri",
+      });
+    }
+
+    console.log("[OAuth] Generating authorization code...");
+
+    const code = crypto.randomBytes(20).toString("hex");
+
+    console.log("[OAuth] Code:", code);
+
+    console.log("[OAuth] Registering application...");
+
+    await this.userAppService.registerApplication(
+      payload.id,
+      client.id,
+    );
+
+    console.log("[OAuth] Application registered");
+
+    console.log("[OAuth] Saving auth code...");
+
+    await this.service.generateAuthCode(
+      code,
+      client.clientId,
+      params.redirect_uri as string,
+      req.userId!,
+      params.state as string,
+    );
+
+    console.log("[OAuth] Auth code saved");
+
+    const redirectUrl =
+      `${params.redirect_uri}` +
+      `?grant_type=${params.grant_type}` +
+      `&code=${code}` +
+      `&state=${params.state}`;
+
+    console.log("[OAuth] FINAL REDIRECT URL:");
+    console.log(redirectUrl);
+
+    console.log("[OAuth] Sending 302 redirect...");
+
+    return res.redirect(302, redirectUrl);
+
+  } catch (err) {
+    console.log("[OAuth] Exception occurred");
+    console.error(err);
+
+    if (err instanceof jwt.TokenExpiredError) {
+      console.log("[OAuth] Token expired. Redirecting to login...");
+      return this.redirectToLogin(req, res);
+    }
+
+    if (err instanceof jwt.JsonWebTokenError) {
+      console.log("[OAuth] Invalid JWT. Redirecting to login...");
+      return this.redirectToLogin(req, res);
+    }
+
+    console.log("[OAuth] Returning 500");
+
+    return res.status(500).json({
+      message: "Authentication failed",
+    });
+  } finally {
+    console.log("[OAuth] Request finished");
+    console.log("========================================");
   }
+}
 
   async getToken(req: Request, res: Response) {
     const { grant_type } = req.body;
@@ -219,9 +290,11 @@ class OAuthController {
 
   async redirectToLogin(req: Request, res: Response) {
     const continueUrl = encodeURIComponent(req.originalUrl);
-    return res.redirect(
-      `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`,
-    );
+    const loginUrl = `${process.env.FRONTEND_URL}/login?redirect=${continueUrl}`;
+    console.log("[OAuth] redirectToLogin()");
+    console.log("[OAuth] Login URL:", loginUrl);
+
+    return res.redirect(302, loginUrl);
   }
 }
 
