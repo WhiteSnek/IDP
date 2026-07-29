@@ -4,6 +4,7 @@ import SessionService from "../service/session.service";
 import {
   loginUserSchema,
   registerUserSchema,
+  updateUserSchema,
 } from "../validation/auth.validation";
 import { email, ZodError } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -262,7 +263,29 @@ class AuthController {
     }
   }
 
+  async getUploadUrl(req: Request,res: Response){
+        try{
+            const { key, contentType } = req.body;
+            const preSignedUrl = await this.service.getUploadUrl(key, contentType);
+            return res.status(200).json(new ApiResponse(200, preSignedUrl, "Pre-signed Url fetched successfully!"))
+
+        } catch (error) {
+            return res.status(500).json(new ApiResponse(500, error, "Something went Wrong!"))
+        }
+    }
+
   // TODO: Add updateUserProfile controller method
+  async updateUser(req: Request, res: Response){
+    try{
+            const user = updateUserSchema.parse(req.body);
+            const userId = req.userId
+            const isUpdated = this.service.updateUser(userId!, user)
+            return res.status(200).json(new ApiResponse(200, isUpdated, "User updated successfully!"))
+
+        } catch (error) {
+            return res.status(500).json(new ApiResponse(500, error, "Something went Wrong!"))
+        }
+  }
   // TODO: Add deleteUser controller method
   // TODO: Add validate email controller method
   // TODO: Add validate phone number controller method

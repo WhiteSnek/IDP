@@ -20,5 +20,6 @@ router.get("/sessions", middleware, (req,res) => sessionController.getUserSessio
 router.delete("/sessions/:id", middleware, (req,res) => sessionController.deleteSession(req,res))
 router.post("/otp/:channel", (req,res) => authController.sendOtp(req,res))
 router.post("/verify/otp/:channel", (req,res) => authController.verifyOTP(req,res))
-
+router.post("/upload-url", middleware, (req,res)=>authController.getUploadUrl(req,res))
+router.patch("/update-user", middleware, (req,res) => authController.updateUser(req,res))
 export default router;

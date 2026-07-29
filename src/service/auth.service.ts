@@ -1,9 +1,10 @@
 import AuthRepository from "../repository/auth.repo";
-import { RegisterUser } from "../types/user";
+import { RegisterUser, UpdateUser } from "../types/user";
 import { ApiResponse } from "../utils/ApiResponse";
 import { hash, compare } from "bcrypt";
 import { generateToken } from "../utils/generateToken";
 import { prisma } from "../config";
+import { generateUploadUrl } from "../utils/generatePreSignedUrl";
 
 class AuthService {
   private repository: AuthRepository;
@@ -17,14 +18,12 @@ class AuthService {
       if (existingUser) {
         return new ApiResponse(409, {}, "User with this email already exists");
       }
-      existingUser = await this.repository.getUserByMobile(
-        data.phone
-      );
+      existingUser = await this.repository.getUserByMobile(data.phone);
       if (existingUser) {
         return new ApiResponse(
           409,
           {},
-          "User with this mobile number already exists"
+          "User with this mobile number already exists",
         );
       }
       data.password = await hash(data.password, 10);
@@ -35,35 +34,45 @@ class AuthService {
     }
   }
 
-  async loginUser(
-    email: string | "",
-    phone: string | "",
-    password: string
-  ) {
+  async loginUser(email: string | "", phone: string | "", password: string) {
     try {
       const user =
         (await this.repository.getUserByEmail(email)) ||
         (await this.repository.getUserByMobile(phone));
       if (!user) {
-        return { response: new ApiResponse(401, {}, "Invalid credentials"), accessToken: null, refreshToken: null };
+        return {
+          response: new ApiResponse(401, {}, "Invalid credentials"),
+          accessToken: null,
+          refreshToken: null,
+        };
       }
       const checkPassword = await compare(password, user.password);
       if (!checkPassword) {
-        return { response: new ApiResponse(401, {}, "Invalid credentials"), accessToken: null, refreshToken: null };
+        return {
+          response: new ApiResponse(401, {}, "Invalid credentials"),
+          accessToken: null,
+          refreshToken: null,
+        };
       }
-      const accessToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "access");
-      const refreshToken = generateToken({ id: user.id, isAdmin: user.isAdmin }, "refresh");
+      const accessToken = generateToken(
+        { id: user.id, isAdmin: user.isAdmin },
+        "access",
+      );
+      const refreshToken = generateToken(
+        { id: user.id, isAdmin: user.isAdmin },
+        "refresh",
+      );
       return {
         response: new ApiResponse(
           200,
           { id: user.id, email: user.email },
-          "Login successful"
+          "Login successful",
         ),
         accessToken,
         refreshToken,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return {
         response: new ApiResponse(500, error, "Internal Server Error"),
         accessToken: null,
@@ -84,9 +93,10 @@ class AuthService {
         first_name: user.first_name,
         last_name: user.last_name,
         phone: user.phone,
+        profile: user.profile,
         isAdmin: user.isAdmin,
         is_email_verified: user.is_email_verified,
-        is_phone_verified: user.is_phone_verified
+        is_phone_verified: user.is_phone_verified,
       };
       return new ApiResponse(200, data, "User profile fetched successfully");
     } catch (error) {
@@ -94,23 +104,42 @@ class AuthService {
     }
   }
 
-  async getUserByEmail(email: string){
-    return await this.repository.getUserByEmail(email)
+  async getUserByEmail(email: string) {
+    return await this.repository.getUserByEmail(email);
   }
 
-  async getUserByMobile(phone: string){
-    return await this.repository.getUserByMobile(phone)
+  async getUserByMobile(phone: string) {
+    return await this.repository.getUserByMobile(phone);
   }
 
-  // TODO: Add updateUserProfile service method
-  async updateUser(userId: string, data: any){
-    await prisma.user.update({
-      where: {
-        id: userId
-      },
-      data
-    })
+  async updateUser(userId: string, data: UpdateUser) {
+    const user = await this.repository.getUserById(userId);
+
+    const updatedData = {
+      ...data,
+
+      ...(data.profile && {
+        profile: `${process.env.CLOUDFRONT_URL}/${data.profile}`,
+      }),
+
+      ...(data.email &&
+        data.email !== user?.email && {
+          is_email_verified: false,
+        }),
+
+      ...(data.phone &&
+        data.phone !== user?.phone && {
+          is_phone_verified: false,
+        }),
+    };
+
+    return await this.repository.updateUser(userId, updatedData);
   }
+
+  async getUploadUrl(key: string, contentType: string) {
+    return generateUploadUrl({ key, contentType });
+  }
+
   // TODO: Add deleteUser service method
   // TODO: Add validate email service method
   // TODO: Add validate phone number service method

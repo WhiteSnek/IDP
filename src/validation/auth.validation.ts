@@ -36,4 +36,19 @@ const loginUserSchema = z
     path: ["email"],
   });
 
-export { registerUserSchema, loginUserSchema };
+const updateUserSchema = z
+  .object({
+    email: z.string().email("Invalid email address").optional(),
+    first_name: z.string().min(1, "First name is required").optional(),
+    last_name: z.string().min(1, "Last name is required").optional(),
+    phone: phoneSchema.optional(),
+    profile: z.string().optional(),
+  })
+  .refine(
+    (data) => Object.values(data).some((value) => value !== undefined),
+    {
+      message: "At least one field must be provided for update.",
+    }
+  );
+
+export { registerUserSchema, loginUserSchema, updateUserSchema };
