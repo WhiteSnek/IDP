@@ -10,7 +10,7 @@ class ApplicationController {
 
     async registerApplication(req: Request, res: Response) {
         const data = registerApplicationSchema.parse(req.body);
-        const response = await this.service.registerApplication(data.name, data.redirectUrls);
+        const response = await this.service.registerApplication(data.name, data.redirectUrls, data.userSyncUrl);
         return res.status(response.statusCode).json(response);
     }
 

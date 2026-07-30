@@ -4,6 +4,8 @@ export interface RegisterApplication {
     redirectUrls: string[];
     clientId: string;
     clientSecret: string;
+    userSyncUrl: string;
+    userSyncSecret: string;
 }
 
 

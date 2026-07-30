@@ -26,6 +26,7 @@ class ApplicationRepository{
                 name: true,
                 createdAt: true,
                 redirectUrls: true,
+                userSyncUrl: true,
                 canSendNotifications: true,
                 allowedChannels: true
             }

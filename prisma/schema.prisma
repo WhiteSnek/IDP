@@ -58,6 +58,8 @@ model Applications {
   clientId             String             @unique
   clientSecret         String
   redirectUrls         String[]
+  userSyncUrl          String?
+  userSyncSecret       String?
   createdAt            DateTime           @default(now())
   canSendNotifications Boolean            @default(false)
   allowedChannels      String[]

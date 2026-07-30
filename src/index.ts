@@ -15,6 +15,34 @@ dotenv.config({
 
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:8000",          
+  "http://localhost:5173",           
+  "http://127.0.0.1:5173",
+  "http://192.168.1.200:5173",       
+];
+
+if (process.env.NODE_ENV === "development") {
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        console.log("Origin:", JSON.stringify(origin));
+
+        if (origin === undefined || origin === null || origin === "null") {
+          return callback(null, true);
+        }
+
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        console.log("Origin:", JSON.stringify(origin), typeof origin);
+        return callback(new Error("Not allowed by CORS"));
+      },
+      credentials: true,
+    })
+  );
+}
 
 app.set("trust proxy", 1);
 
