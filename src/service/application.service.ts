@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { ApiResponse } from "../utils/ApiResponse";
 import slugify from "../utils/slugCreater";
 import { ALL_CHANNELS } from "../constants";
+import { encrypt } from "../utils/encryptKey";
 class ApplicationService {
   private repository: ApplicationRepository;
   constructor() {
@@ -24,7 +25,7 @@ class ApplicationService {
 
       // User sync secret
       const rawUserSyncSecret = crypto.randomBytes(32).toString("hex");
-      const hashedUserSyncSecret = await bcrypt.hash(rawUserSyncSecret, 12);
+      const encryptedUserSyncSecret = encrypt(rawUserSyncSecret);
 
       const application = await this.repository.registerApplication({
         name,
@@ -32,7 +33,7 @@ class ApplicationService {
         clientSecret: hashedClientSecret,
         redirectUrls,
         userSyncUrl,
-        userSyncSecret: hashedUserSyncSecret,
+        userSyncSecret: encryptedUserSyncSecret,
       });
 
       return new ApiResponse(
