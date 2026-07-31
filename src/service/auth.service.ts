@@ -3,8 +3,8 @@ import { RegisterUser, UpdateUser } from "../types/user";
 import { ApiResponse } from "../utils/ApiResponse";
 import { hash, compare } from "bcrypt";
 import { generateToken } from "../utils/generateToken";
-import { prisma } from "../config";
 import { generateUploadUrl } from "../utils/generatePreSignedUrl";
+import { sqsService } from "./sqs.service";
 
 class AuthService {
   private repository: AuthRepository;
@@ -133,7 +133,14 @@ class AuthService {
         }),
     };
 
-    return await this.repository.updateUser(userId, updatedData);
+    const updatedUser = await this.repository.updateUser(userId, updatedData);
+    await sqsService.sendMessage({
+      event: "USER_UPDATED",
+      userId,
+      timestamp: Date.now(),
+    });
+
+    return updatedUser;
   }
 
   async getUploadUrl(key: string, contentType: string) {
