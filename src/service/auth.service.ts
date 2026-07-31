@@ -112,6 +112,10 @@ class AuthService {
     return await this.repository.getUserByMobile(phone);
   }
 
+  async updateUserVerification(userId: string, data: any){
+    await this.repository.updateUser(userId,data);
+  }
+
   async updateUser(userId: string, data: UpdateUser) {
     const user = await this.repository.getUserById(userId);
 
