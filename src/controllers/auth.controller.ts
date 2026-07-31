@@ -246,7 +246,7 @@ class AuthController {
         user = await this.service.getUserByMobile(receiver);
       }
       const userId = user?.id;
-      await this.service.updateUser(userId!, data);
+      await this.service.updateUserVerification(userId!, data);
       return res
         .status(200)
         .json(
