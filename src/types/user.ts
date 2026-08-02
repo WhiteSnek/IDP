@@ -3,6 +3,8 @@ export interface RegisterUser {
     password: string;
     first_name: string;
     last_name: string;
+    gender: string;
+    date_of_birth: string;
     phone: string;
 }
 
@@ -12,6 +14,8 @@ export interface User {
     first_name: string;
     last_name: string;
     phone: string;
+    gender: string;
+    date_of_birth: string;
     profile: string;
     isAdmin: boolean;
 }
@@ -22,6 +26,8 @@ export interface UpdateUser {
     last_name?: string;
     phone?: string;
     profile?: string;
+    gender?: string;
+    date_of_birth?: string;
     is_email_verified?: boolean;
     is_phone_verified?: boolean;
 }

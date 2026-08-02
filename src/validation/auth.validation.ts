@@ -2,7 +2,10 @@ import { z } from "zod";
 
 const phoneSchema = z
   .string()
-  .regex(/^\+[1-9]\d{7,14}$/, "Phone must be in E.164 format (e.g. +919876543210)");
+  .regex(
+    /^\+[1-9]\d{7,14}$/,
+    "Phone must be in E.164 format (e.g. +919876543210)",
+  );
 
 const registerUserSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -15,12 +18,27 @@ const registerUserSchema = z.object({
     .regex(/\d/, "Password must contain at least one number")
     .regex(
       /[^A-Za-z0-9]/,
-      "Password must contain at least one special character"
+      "Password must contain at least one special character",
     ),
 
   first_name: z.string().min(1, "First name is required"),
 
   last_name: z.string().min(1, "Last name is required"),
+
+  gender: z.enum(["male", "female", "other"], "Gender is required"),
+  date_of_birth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format")
+    .refine((value) => {
+      const [year, month, day] = value.split("-").map(Number);
+      const date = new Date(Date.UTC(year, month - 1, day));
+
+      return (
+        date.getUTCFullYear() === year &&
+        date.getUTCMonth() === month - 1 &&
+        date.getUTCDate() === day
+      );
+    }, "Invalid date of birth"),
 
   phone: phoneSchema,
 });
@@ -31,7 +49,7 @@ const loginUserSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     phone: phoneSchema.optional(),
   })
-  .refine((data) => !!data.email || (!!data.phone), {
+  .refine((data) => !!data.email || !!data.phone, {
     message: "Either email or phone number must be provided",
     path: ["email"],
   });
@@ -43,12 +61,24 @@ const updateUserSchema = z
     last_name: z.string().min(1, "Last name is required").optional(),
     phone: phoneSchema.optional(),
     profile: z.string().optional(),
+    gender: z.enum(["male", "female", "other"]).optional(),
+    date_of_birth: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format")
+      .refine((value) => {
+        const [year, month, day] = value.split("-").map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+
+        return (
+          date.getUTCFullYear() === year &&
+          date.getUTCMonth() === month - 1 &&
+          date.getUTCDate() === day
+        );
+      }, "Invalid date of birth")
+      .optional(),
   })
-  .refine(
-    (data) => Object.values(data).some((value) => value !== undefined),
-    {
-      message: "At least one field must be provided for update.",
-    }
-  );
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: "At least one field must be provided for update.",
+  });
 
 export { registerUserSchema, loginUserSchema, updateUserSchema };

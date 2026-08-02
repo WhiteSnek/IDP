@@ -94,6 +94,8 @@ class AuthService {
         last_name: user.last_name,
         phone: user.phone,
         profile: user.profile,
+        gender: user.gender,
+        date_of_birth: user.date_of_birth,
         isAdmin: user.isAdmin,
         is_email_verified: user.is_email_verified,
         is_phone_verified: user.is_phone_verified,

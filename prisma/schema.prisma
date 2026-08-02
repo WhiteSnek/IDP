@@ -28,6 +28,8 @@ model User {
   updatedAt          DateTime             @updatedAt
   isAdmin            Boolean              @default(false)
   profile            String               @default("")
+  gender             String               @default("")
+  date_of_birth      DateTime?
   // Relations
   sessions           Sessions[]
   userApplications   UserApplications[]
