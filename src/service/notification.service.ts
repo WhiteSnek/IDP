@@ -3,6 +3,7 @@ import AuthRepository from "../repository/auth.repo";
 import TokenRepository from "../repository/token.repo";
 import { expiresAtToExpiresIn } from "../utils/formatDateTime";
 import { generateIDPToken } from "../utils/generateIDPToken";
+import { ApiResponse } from "../utils/ApiResponse";
 
 class NotificationService {
   private tokenRepo: TokenRepository;
@@ -73,7 +74,7 @@ class NotificationService {
     }
   }
 
-  async verifyOtp(otp: string, receiver: string, channel: "email" | "sms"): Promise<boolean>{
+  async verifyOtp(otp: string, receiver: string, channel: "email" | "sms"): Promise<any>{
     let user = null;
     if(channel === 'email'){
       user = await this.authRepo.getUserByEmail(receiver);
@@ -96,6 +97,43 @@ class NotificationService {
     }
     await this.tokenRepo.deleteOtp(entry.id)
     return true;
+  }
+
+  async addTemplate(subject:string, eventName: string, clientId: string, channel: "email" | "sms" | "whatsapp" | "push"){
+    const notificationUri = process.env.NOTIFICATION_URI;
+    if (!notificationUri) {
+      throw new Error("NOTIFICATION_URI not configured");
+    }
+    const payload = {
+      subject,
+      eventName,
+      clientId,
+      channel,
+    };
+
+    const token = generateIDPToken();
+
+    try {
+      const response = await axios.post(notificationUri, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 5000,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Notification service responded with ${response.status}`);
+      }
+
+      return new ApiResponse(response.data.statusCode, response.data.data, "Template added successfully");
+    } catch (error: any) {
+      throw new Error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to add template"
+      );
+    }
   }
 }
 
