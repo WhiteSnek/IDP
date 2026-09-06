@@ -100,9 +100,9 @@ class NotificationService {
   }
 
   async addTemplate(subject:string, eventName: string, clientId: string, channel: "email" | "sms" | "whatsapp" | "push"){
-    const notificationUri = process.env.NOTIFICATION_URI;
+    const notificationUri = process.env.NOTIFICATION_TEMPLATE_URI;
     if (!notificationUri) {
-      throw new Error("NOTIFICATION_URI not configured");
+      throw new Error("NOTIFICATION_TEMPLATE_URI not configured");
     }
     const payload = {
       subject,
